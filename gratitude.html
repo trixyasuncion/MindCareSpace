@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gratitude Journal — MindCareSpace</title>
+<style>
+  :root{
+    --bg1: #fbf7ff;
+    --accent: #6a4c9c;
+    --card: #fff;
+    --muted: #6b6b6b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Georgia", serif;
+    background: linear-gradient(180deg,#f6eefc,#eef8ff);
+    color:#222;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:980px;
+  }
+
+  header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  header h1{margin:0;color:var(--accent);font-size:28px}
+  header p{margin:6px 0 0;color:var(--muted)}
+
+  .layout{
+    display:grid;
+    grid-template-columns: 380px 1fr;
+    gap:20px;
+    align-items:start;
+  }
+
+  /* LEFT: form */
+  .panel{
+    background:var(--card);
+    padding:18px;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(106,76,156,.12);
+  }
+  .panel h2{margin:0 0 12px 0;color:var(--accent);}
+  label{display:block;font-weight:600;margin-top:10px;font-size:14px}
+  input[type="date"], select, textarea, input[type="text"]{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #e5dff0;
+    font-family:inherit;
+    font-size:15px;
+    margin-top:6px;
+  }
+  textarea{min-height:90px; resize:vertical}
+  .small-row{display:flex;gap:8px}
+  .small-row > *{flex:1}
+
+  .actions{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+    justify-content:flex-end;
+  }
+  button{
+    background:var(--accent);
+    color:white;
+    border:none;
+    padding:10px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+  }
+  button.ghost{
+    background:transparent;color:var(--accent);
+    border:2px solid var(--accent);
+  }
+
+  /* RIGHT: entries list */
+  .entries{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .entry-card{
+    background:var(--card);
+    padding:14px;
+    border-radius:10px;
+    box-shadow:0 6px 16px rgba(106,76,156,.08);
+    border-left:4px solid #efe3ff;
+  }
+  .entry-head{
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .entry-head h3{margin:0;font-size:16px;color:var(--accent)}
+  .entry-head .meta{font-size:13px;color:var(--muted)}
+  .entry-body{margin-top:10px;color:#333}
+  .entry-body p{margin:6px 0}
+
+  .entry-controls{display:flex;gap:8px;margin-top:8px}
+
+  .small{
+    font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid #eee;background:#fafafa;cursor:pointer;
+  }
+
+  /* print styles */
+  @media print{
+    body{background:white}
+    .layout, .actions, .entry-controls, .ghost, .nav{display:none}
+    .wrap{max-width:100%;padding:0}
+    .entry-card{page-break-inside:avoid}
+  }
+
+  /* responsive */
+  @media (max-width:880px){
+    .layout{grid-template-columns:1fr; }
+  }
+
+  .empty{
+    text-align:center;color:var(--muted);padding:36px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfbff);
+  }
+
+  .tools{display:flex;gap:8px;align-items:center;justify-content:flex-start;margin-bottom:12px}
+  .tools button{background:transparent;color:var(--accent);border:2px solid var(--accent);padding:8px 10px;border-radius:8px;font-weight:700}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Gratitude Journal</h1>
+      <p>Daily practice: note three things you're grateful for & reflect.</p>
+    </header>
+
+    <div class="layout">
+      <!-- left: form -->
+      <aside class="panel" aria-label="Add entry">
+        <h2>New Entry</h2>
+
+        <label for="date">Date</label>
+        <input id="date" type="date">
+
+        <label for="g1">Gratitude 1</label>
+        <input id="g1" type="text" placeholder="e.g. warm cup of coffee">
+
+        <label for="g2">Gratitude 2</label>
+        <input id="g2" type="text" placeholder="e.g. a friend's message">
+
+        <label for="g3">Gratitude 3</label>
+        <input id="g3" type="text" placeholder="e.g. a good walk">
+
+        <label for="mood">Mood</label>
+        <select id="mood">
+          <option value="">— select mood —</option>
+          <option>Calm</option>
+          <option>Hopeful</option>
+          <option>Grateful</option>
+          <option>Relaxed</option>
+          <option>Reflective</option>
+        </select>
+
+        <label for="notes">Reflection (short)</label>
+        <textarea id="notes" placeholder="What made today meaningful?"></textarea>
+
+        <div class="actions">
+          <button id="saveBtn">Save Entry</button>
+          <button id="clearBtn" class="ghost" type="button">Clear</button>
+        </div>
+
+        <div style="margin-top:12px;">
+          <small style="color:var(--muted)">Tip: write 3 small items each day — small things add up.</small>
+        </div>
+      </aside>
+
+      <!-- right: entries -->
+      <main>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="tools">
+            <button id="printAll">Print All</button>
+            <button id="exportBtn">Export JSON</button>
+          </div>
+          <div class="nav">
+            <button id="newToday" class="ghost">New Today</button>
+          </div>
+        </div>
+
+        <div id="list" class="entries" aria-live="polite"></div>
+
+        <template id="entryTpl">
+          <article class="entry-card">
+            <div class="entry-head">
+              <h3 class="entry-title"></h3>
+              <div class="meta"><span class="date"></span> • <span class="mood"></span></div>
+            </div>
+            <div class="entry-body">
+              <p><strong>1.</strong> <span class="g1"></span></p>
+              <p><strong>2.</strong> <span class="g2"></span></p>
+              <p><strong>3.</strong> <span class="g3"></span></p>
+              <p class="reflect"><em></em></p>
+            </div>
+            <div class="entry-controls">
+              <button class="small edit">Edit</button>
+              <button class="small del">Delete</button>
+              <button class="small print">Print</button>
+            </div>
+          </article>
+        </template>
+
+        <div id="empty" class="empty" style="display:none">
+          No entries yet — add a gratitude entry to begin ✨
+        </div>
+      </main>
+    </div>
+  </div>
+
+<script>
+/* Gratitude Journal - localStorage */
+const KEY = 'mindcare_gratitude_v1';
+const listEl = document.getElementById('list');
+const tpl = document.getElementById('entryTpl').content;
+const emptyEl = document.getElementById('empty');
+
+const dateEl = document.getElementById('date');
+const g1 = document.getElementById('g1');
+const g2 = document.getElementById('g2');
+const g3 = document.getElementById('g3');
+const mood = document.getElementById('mood');
+const notes = document.getElementById('notes');
+
+const saveBtn = document.getElementById('saveBtn');
+const clearBtn = document.getElementById('clearBtn');
+const printAll = document.getElementById('printAll');
+const exportBtn = document.getElementById('exportBtn');
+const newToday = document.getElementById('newToday');
+
+let entries = []; // {id, date, g1,g2,g3,mood,notes,created}
+
+// utility
+const uid = ()=>Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+function load(){
+  try{
+    entries = JSON.parse(localStorage.getItem(KEY) || '[]');
+  }catch(e){ entries=[]; }
+  render();
+}
+function saveStorage(){ localStorage.setItem(KEY, JSON.stringify(entries)); }
+
+function render(){
+  listEl.innerHTML = '';
+  if(!entries.length){ emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+
+  // newest first
+  [...entries].reverse().forEach(entry=>{
+    const node = tpl.cloneNode(true);
+    node.querySelector('.entry-title').textContent = entry.date || entry.created.slice(0,10);
+    node.querySelector('.date').textContent = entry.date || entry.created.slice(0,10);
+    node.querySelector('.mood').textContent = entry.mood || '-';
+    node.querySelector('.g1').textContent = entry.g1 || '';
+    node.querySelector('.g2').textContent = entry.g2 || '';
+    node.querySelector('.g3').textContent = entry.g3 || '';
+    node.querySelector('.reflect em').textContent = entry.notes || '';
+    // attach controls
+    const art = node.querySelector('article');
+    node.querySelector('.del').addEventListener('click', ()=>{
+      if(confirm('Delete this entry?')){ entries = entries.filter(e=>e.id!==entry.id); saveStorage(); render(); }
+    });
+    node.querySelector('.edit').addEventListener('click', ()=>{
+      // populate form for edit
+      dateEl.value = entry.date || '';
+      g1.value = entry.g1 || '';
+      g2.value = entry.g2 || '';
+      g3.value = entry.g3 || '';
+      mood.value = entry.mood || '';
+      notes.value = entry.notes || '';
+      // remove original and let user save as replacement
+      entries = entries.filter(e=>e.id!==entry.id);
+      saveStorage();
+      render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+    node.querySelector('.print').addEventListener('click', ()=>{
+      // print single entry
+      printSingle(entry);
+    });
+    listEl.appendChild(node);
+  });
+}
+
+saveBtn.addEventListener('click', ()=>{
+  const payload = {
+    id: uid(),
+    date: dateEl.value,
+    g1: g1.value.trim(),
+    g2: g2.value.trim(),
+    g3: g3.value.trim(),
+    mood: mood.value,
+    notes: notes.value.trim(),
+    created: new Date().toISOString()
+  };
+  // basic validation — require at least one gratitude item
+  if(!payload.g1 && !payload.g2 && !payload.g3){
+    alert('Write at least one gratitude item.');
+    return;
+  }
+  entries.push(payload);
+  saveStorage();
+  render();
+  // clear form
+  dateEl.value=''; g1.value=''; g2.value=''; g3.value=''; mood.value=''; notes.value='';
+});
+
+clearBtn.addEventListener('click', ()=>{
+  if(confirm('Clear form?')){ dateEl.value=''; g1.value=''; g2.value=''; g3.value=''; mood.value=''; notes.value=''; }
+});
+
+newToday.addEventListener('click', ()=>{
+  const today = new Date().toISOString().slice(0,10);
+  dateEl.value = today;
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+printAll.addEventListener('click', ()=> window.print());
+
+exportBtn.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'gratitude-entries.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+/* print single entry (opens a new window with formatted content) */
+function printSingle(entry){
+  const html = `
+    <html><head><title>Gratitude Entry</title>
+    <style>
+      body{font-family:Georgia,serif;padding:30px;color:#222}
+      h1{color:${'#6a4c9c'}}
+      .meta{color:#666;font-style:italic;margin-bottom:10px}
+      p{line-height:1.6}
+    </style>
+    </head><body>
+    <h1>Gratitude — ${entry.date || entry.created.slice(0,10)}</h1>
+    <div class="meta">Mood: ${entry.mood || '-'}</div>
+    <p><strong>1.</strong> ${entry.g1 || ''}</p>
+    <p><strong>2.</strong> ${entry.g2 || ''}</p>
+    <p><strong>3.</strong> ${entry.g3 || ''}</p>
+    <hr>
+    <p><em>${entry.notes || ''}</em></p>
+    </body></html>`;
+  const w = window.open('', '_blank', 'noopener');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  w.print();
+  // optionally close after print
+  // setTimeout(()=>w.close(), 500);
+}
+
+load();
+</script>
+</body>
+</html>

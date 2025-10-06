@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindCareSpace</title>
+
+<style>
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(550deg,#e9f6fa,#ede6f3);
+}
+
+/* Top title */
+.top-bar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: linear-gradient(30deg,#e9f6fa,#ede6f3);
+  box-shadow: 0 2px 5px rgba(199, 168, 200, 0.592);
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333333;
+  z-index: 1000;
+}
+
+/* Sections */
+.page-section {
+  min-height: 100vh;
+  padding: 8rem 2rem 5rem; /* room for top & bottom bars */
+  box-sizing: border-box;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  margin-left: 5px auto;
+  background: linear-gradient(30deg,#e9f6fa,#ede6f3);
+  display: flex;
+  justify-content: space-around;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.bottom-nav a {
+  display: block;
+  padding: 1rem;
+  text-decoration: none;
+  color: #333333;
+  font-weight: bold;
+}
+
+
+
+.bottom-nav a:hover { background: linear-gradient(30deg,#e9f6fa,#ede6f3) }
+</style>
+
+
+</head>
+
+<style>
+@keyframes meltCircle {
+  0%   {border-radius:50% 50% 50% 50% / 50% 50% 50% 50%;}
+  25%  {border-radius:55% 45% 60% 40% / 60% 40% 55% 45%;}
+  50%  {border-radius:60% 40% 50% 50% / 50% 60% 40% 50%;}
+  75%  {border-radius:45% 55% 40% 60% / 55% 45% 60% 40%;}
+  100% {border-radius:50% 50% 50% 50% / 50% 50% 50% 50%;}
+}
+.circle-box {
+  width: 350px;
+  height: 350px;
+  margin: 40px auto;
+  margin-top: 40px auto;
+  background:linear-gradient(30deg,#c8e2ea,#e3d8ed);
+  border-color:linear-gradient(30deg,#e9f6fa,#ede6f3) ;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 50%;
+  animation: meltCircle 6s ease-in-out infinite alternate;
+}
+
+.slide-text {
+  position: absolute;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.7s ease;
+}
+
+.slide-text.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.video-gallery {
+  background: linear-gradient(30deg,#e9f6fa,#ede6f3);
+  border: 3px linear-gradient(30deg,#e9f6fa,#ede6f3);
+  border-radius: 20px;
+  padding: 25px;
+  margin: 40px auto;
+  width: 85%;
+  max-width: 900px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.video-gallery h3 {
+  color:#2f1541;
+  font-size: 1.6em;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.video-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.video-container video {
+  width: 400px;
+  max-width: 100%;
+  border: 3px solid #65506e;
+  border-radius: 15px;
+}
+.video-gallery p a {
+  color:#2f1541;
+  text-decoration:none;
+  font-weight:bold;
+}
+.video-gallery p a:hover {
+  text-decoration:underline;
+}
+
+.page-section {
+  padding:60px 20px;
+}
+
+.offers {
+    display: flex;
+    flex-direction: column; /* stacked pababa */
+    align-items: flex-start; /* nasa kaliwa lahat */
+    gap: 20px; /* pagitan ng bawat box */
+    margin-left: 20px; /* space mula kaliwa */
+}
+
+
+    .box {
+      background: linear-gradient(30deg, #e9f6fa, #f9ecff);
+      width: 220px;  /* binawasan para magkasya yung 4 */
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      box-shadow: 4px 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+      text-align: center;
+    }
+    
+    .box:hover {
+      transform: scale(1.08);
+      box-shadow: 0px 0px 20px rgba(123, 31, 162, 0.6),
+                  0px 0px 30px rgba(33, 150, 243, 0.5);
+    }
+
+
+    .box h3{
+        margin-top:0;
+        font-size:20px;
+    }
+
+    /* hidden content */
+    .content{
+        max-height:0;
+        overflow:hidden;
+        transition:max-height 0.5s ease;
+        margin-top:10px;
+        font-size: small;
+    }
+    .content.show{
+        max-height:500px; /* enough height to reveal items */
+    }
+
+    .content a {
+  display: block;          /* bawat isa hiwalay linya */
+  margin: 8px 0;
+  text-decoration: none;   /* tanggal underline */
+  color: #4b0082;          /* classy violet */
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.content a:hover {
+  color: #b030b0;          
+
+    .content p{
+        margin:6px 0;
+        font-size: 50px;
+    }
+
+    body {
+    min-width: 900px; /* o depende sa lapad na gusto mo */
+}
+
+
+.services-container {
+  display: flex;
+  align-items: flex-start; /* para pantay sa itaas */
+  justify-content: space-between;
+  gap: 30px; /* pagitan ng left at right */
+}
+
+.offers {
+  flex: 1;
+  min-width: 300px;
+}
+
+.services-info {
+  flex: 1;
+  background: linear-gradient(135deg, #fafbff, #eef3f9);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-family: "Poppins", sans-serif;
+  color: #333;
+  line-height: 1.8;
+}
+
+.services-info h2 {
+  color: #3a4a7a;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.services-info ul {
+  list-style: none;
+  padding: 0;
+}
+
+.services-info li {
+  margin-bottom: 10px;
+}
+
+.services-info .closing {
+  margin-top: 20px;
+  font-style: italic;
+  color: #5d6dc0;
+  text-align: center;
+}
+
+</style>
+
+
+<head>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;   /* <-- change this to any font you like */
+    }
+
+    h2 {
+      font-family: "Georgia", serif;      /* <-- a different font for all headlines */
+      font-size: 35px;
+      text-align: center;
+      color: #333333;
+      padding-top: 10px;
+
+      
+    }
+
+    p {
+      font-family: "Verdana", sans-serif; /* <-- or keep the same as body if you want */
+      font-size: 25px;
+      text-align: center;
+      color: #333333;
+    }
+
+
+
+
+  </style>
+
+</head>
+
+
+<body>
+
+  
+
+  
+
+<!-- Top logo/title -->
+<header class="top-bar">
+  MindCareSpace
+</header>
+
+<!-- Page sections -->
+<section id="home" class="page-section">
+  <h2>Step into your safe space—your journey to mental wellness starts here.</h2>
+  <p>"Your Safe Space for Mental Wellness" is your quiet corner to pause and breathe.
+     Here, you’ll find simple ways to care for your mind, lift your spirits,
+     and remind yourself that your well-being matters every single day.</p>
+<div class="circle-box">
+    <div id="affirmation" class="slide-text show">I am calm.</div>
+  </div>
+</section>
+
+<script>
+function initAffirmationRotator() {
+  const affirmations = [
+    "I am calm.",
+    "I am capable.",
+    "This moment is enough.",
+    "I choose peace.",
+    "I am stronger than I think.",
+    "I am grateful for today."
+  ];
+
+  let i = 0;
+  const box = document.getElementById('affirmation');
+
+  setInterval(() => {
+    // fade out
+    box.classList.remove('show');
+    setTimeout(() => {
+      i = (i + 1) % affirmations.length;
+      box.textContent = affirmations[i];
+      // fade in with slide
+      box.classList.add('show');
+    }, 700); // matches the transition duration
+  }, 3000);  // change text every 3 seconds
+}
+
+window.onload = initAffirmationRotator;
+</script>
+
+
+
+
+<div class="video-gallery">
+  <h3>Relaxing Videos</h3>
+
+  <div class="video-container">
+    <video controls>
+      <source src="c:\Users\MARY GRACE\Downloads\How to Manage Stress as a Student.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <video controls>
+      <source src="c:\Users\MARY GRACE\Downloads\10 Daily Habits to Reduce Stress and Anxiety.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <p><a href="videos.html">View More Videos</a></p>
+</div>
+</section>
+
+
+
+     
+</section>
+
+
+<section id="services" class="page-section">
+  <h2>“Discover the ways we guide you to mental wellness and brighter days.”</h2>
+  <p>We Offer You</p>
+
+  <section id="services" class="page-section" style="display: flex; justify-content: center; gap: 40px; align-items: flex-start;">
+
+  <!-- LEFT SIDE (TABS) -->
+  <div style="display: flex; flex-direction: column; gap: 25px;">
+    <div class="box">
+      <h3>📖 Articles (click to open)</h3>
+      <div class="content">
+        <a href="articles.html">Read inspiring stories and insights.</a>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>📔 Journals (click to open)</h3>
+      <div class="content">
+        <a href="#">Express your thoughts freely.</a>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>✨ Inspirational Quotes (click to open)</h3>
+      <div class="content">
+        <a href="inspirationalquotes.html">Find words that lift your spirit.</a>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>🎮 Activities (click to open)</h3>
+      <div class="content">
+        <a href="activities.html">Wellness begins with small, fun steps.</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE (TEXT) -->
+  <div style="
+  flex: 1;
+  background:linear-gradient(135deg,#f8f4ff,#e8f6ff);
+  padding: 63px 50px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 400px;
+  line-height: 1.3;
+  text-align: justify;
+  font-size: 10px;
+  color: #333;
+">
+  <h2 style="text-align: center; font-size: 24px; margin-bottom: 15px;">
+    🌸 <b>Why Explore Our Services?</b> 🌼
+  </h2>
+  <p style="margin-bottom: 15px; text-align: center;">
+    Every click is a step toward knowing yourself better.
+    Each section of MindCareSpace is designed to support your mental well-being — one moment at a time.
+  </p>
+  <p style="margin-bottom: 15px;">
+    🕊️ <b>Learn</b> through inspiring <b>Articles</b> that open your heart and mind.<br>
+    ✍️ <b>Reflect</b> in your <b>Journals</b>, where your emotions find their voice.<br>
+    💖 <b>Feel inspired</b> with <b>Quotes</b> that remind you to keep going.<br>
+    🌈 <b>Reconnect</b> with joy through mindful <b>Activities</b> that help you breathe and smile again.
+  </p>
+  <p style="text-align: center; font-style: italic;">
+    Remember — healing doesn’t happen overnight, but it starts with small choices.<br>
+    Take this moment for yourself. Click, explore, and begin your journey to peace.
+  </p>
+</div>
+
+</section>
+
+  </div>
+</section>
+
+<script>
+function toggleBox(box){
+    const content = box.querySelector('.content');
+    content.classList.toggle('show');
+}
+</script>
+ 
+</section>
+
+<section id="about" class="page-section">
+
+</body>
+<section style="
+  max-width:1000px;
+  margin:15px auto;
+  margin-top: 5px;
+  padding:40px;
+  background:linear-gradient(135deg,#f8f4ff,#e8f6ff);
+  border-radius:20px;
+  box-shadow:0 6px 14px rgba(0,0,0,0.1);
+  color:#333;
+">
+
+  <h2 style="text-align:center;
+             font-size:2.5rem;
+             color:#5a4d9c;
+             margin-bottom:40px;">
+    “Our Story & Purpose”
+  </h2>
+
+  <div style="display:flex;flex-wrap:wrap;gap:30px;justify-content:center;">
+
+    <div style="
+        flex:1 1 280px;
+        background:#fff;
+        padding:25px;
+        border-radius:15px;
+        box-shadow:0 4px 8px rgba(0,0,0,0.08);
+        text-align:center;
+        transition:transform 0.3s;
+      " onmouseover="this.style.transform='scale(1.03)'"
+        onmouseout="this.style.transform='scale(1)'">
+      <h3 style="color:#6c63ff;margin-bottom:15px;">🌱 Our Mission</h3>
+      <p style="font-size:1.05rem;line-height:1.6;">
+        To create a safe and uplifting space where anyone can
+        nurture mental well-being, find hope, and learn simple
+        daily habits for a calmer, healthier life.
+      </p>
+    </div>
+
+    <div style="
+        flex:1 1 280px;
+        background:#fff;
+        padding:25px;
+        border-radius:15px;
+        box-shadow:0 4px 8px rgba(0,0,0,0.08);
+        text-align:center;
+        transition:transform 0.3s;
+      " onmouseover="this.style.transform='scale(1.03)'"
+        onmouseout="this.style.transform='scale(1)'">
+      <h3 style="color:#6c63ff;margin-bottom:15px;">💡 What We Offer</h3>
+      <p style="font-size:1.05rem;line-height:1.6;">
+        Guided self-care activities, inspiring quotes, journals, articles,
+        interactive puzzles, and a friendly community—
+        all designed to relieve stress and build resilience.
+      </p>
+    </div>
+
+    <div style="
+        flex:1 1 280px;
+        background:#fff;
+        padding:25px;
+        border-radius:15px;
+        box-shadow:0 4px 8px rgba(0,0,0,0.08);
+        text-align:center;
+        transition:transform 0.3s;
+      " onmouseover="this.style.transform='scale(1.03)'"
+        onmouseout="this.style.transform='scale(1)'">
+      <h3 style="color:#6c63ff;margin-bottom:15px;">💜 Why It Matters</h3>
+      <p style="font-size:1.05rem;line-height:1.6;">
+        
+        We believe that mental health is just as important as physical health. 
+        Our goal is to break the stigma and create a positive, supportive space 
+        for everyone seeking balance and healing.
+        Mental health touches every part of life.
+        Supporting each other today means stronger,
+        happier communities tomorrow.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<section id="contact" class="page-section">
+  <h2>💌Contact</h2>
+  <p></p>
+</section>
+
+<section id="resources" class="page-section">
+  <h2></h2>
+  <p>Links or materials for mental wellness.</p>
+</section>
+
+<!-- Bottom floating nav -->
+<nav class="bottom-nav">
+  <a href="#home">🏡 Home</a>
+  <a href="#services">💆‍♀️ Services</a>
+   <a href="#about">ℹ️ About</a>
+  <a href="#contact">📞 Contact</a>
+  <a href="#resources">📚 Resources</a>
+</nav>
+
+</body>
+
+
+</html>

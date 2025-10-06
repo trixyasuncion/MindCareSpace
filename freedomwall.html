@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freedom Wall – Sticky Notes</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:-o-linear-gradient(550deg,#e6dfec,#e2f1f6)
+  color: #333;
+}
+
+/* ======= TOP BAR (same style as screenshot) ======= */
+.topbar{
+  background:linear-gradient(30deg,#cfe7ee,#ebddf8);
+  color:#9d8ae3;
+  text-align:center;
+  padding:30px 30px;
+  position:relative;      /* so we can absolutely position the buttons */
+}
+.topbar h1{
+  margin:0;
+  font-size:32px;
+  font-weight:bold;
+}
+.topbar p{
+  margin:5px 0 0;
+  font-size:16px;
+  color:#9d8ae3;
+}
+
+/* nav buttons on the right */
+.topbar .nav-buttons{
+  position:absolute;
+  top:50%;
+  right:20px;
+  transform:translateY(-50%);
+}
+.topbar .nav-buttons button{
+  background:white;
+  color:#6a4c9c;
+  border:none;
+  padding:8px 16px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-left:10px;
+}
+.topbar .nav-buttons button:hover{background:#ddd;}
+
+/* ======= MAIN CONTENT ======= */
+.container{
+  max-width:800px;
+  margin:35px auto;
+  background:linear-gradient(30deg,#cfe7ee,#ebddf8);
+  padding:90px;
+  border-radius:10px;
+}
+
+#messageInput{
+  width:100%;
+  height:100px;
+  border-radius:8px;
+  border:none;
+  padding:10px;
+  resize:none;
+  font-size:16px;
+  display:block;
+  margin-bottom:15px;
+}
+
+#addBtn{
+  display:block;
+  margin:0 auto 15px auto;
+  padding:10px 20px;
+  background:#fff;
+  color:#6a4c9c;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+#wall{
+  margin-top:25px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  justify-content:center;
+}
+
+.note{
+  width:150px;min-height:100px;
+  background:#eea9ff;
+  border-radius:8px;
+  box-shadow:0 4px 6px rgba(0,0,0,0.2);
+  position:relative;
+  padding:10px;
+  word-wrap:break-word;
+}
+.pin{
+  width:18px;height:18px;background:red;
+  border-radius:50%;
+  position:absolute;top:-9px;left:50%;
+  transform:translateX(-50%);
+  box-shadow:0 2px 4px rgba(0,0,0,0.3);
+}
+.note p{margin-top:15px;white-space:pre-wrap;}
+.actions{
+  position:absolute;bottom:5px;right:5px;
+}
+.actions button{
+  background:transparent;
+  border:none;
+  color:#6a4c9c;
+  font-size:14px;
+  cursor:pointer;
+  margin-left:4px;
+}
+
+/* hidden archive panel */
+#archivePanel{
+  display:none;
+  max-width:800px;
+  margin:20px auto;
+  background:linear-gradient(30deg,#cfe7ee,#ebddf8);
+  padding:20px;
+  border-radius:10px;
+}
+#archivePanel h2{text-align:center;margin-top:0;}
+#archive{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  justify-content:center;
+}
+
+@media print {
+  .nav-buttons, #archivePanel {display:none !important;}
+  body{
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .note{
+    background:#daa9ff !important;
+    box-shadow:0 4px 6px rgba(0,0,0,0.2) !important;
+  }
+  .pin{
+    background:red !important;
+    box-shadow:0 2px 4px rgba(0,0,0,0.3) !important;
+  }
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-only, .print-only * {
+    visibility: visible;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+  }
+
+  .print-only .note {
+    background-color: #d69cf2 !important;  /* your purple */
+    padding: 20px;
+    width: 250px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    font-family: Arial, sans-serif;
+    color: black;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- ======= TOP BAR ======= -->
+<div class="topbar">
+  <h1>Freedom Wall – Sticky Notes</h1>
+  <p>Share your thoughts—each message becomes a colorful note!</p>
+  <div class="nav-buttons">
+    <button id="toggleArchive">Archive</button>
+    <button id="printBtn">Print</button>
+  </div>
+</div>
+
+<div class="container">
+  <textarea id="messageInput" placeholder="Write your message here..."></textarea>
+  <button id="addBtn">Post Note</button>
+  <div id="wall"></div>
+</div>
+
+<!-- Hidden archive section -->
+<div id="archivePanel">
+  <h2>Archived Notes</h2>
+  <div id="archive"></div>
+</div>
+
+<script>
+const input=document.getElementById('messageInput');
+const addBtn=document.getElementById('addBtn');
+const wall=document.getElementById('wall');
+const archive=document.getElementById('archive');
+const archivePanel=document.getElementById('archivePanel');
+const toggleArchive=document.getElementById('toggleArchive');
+const printBtn=document.getElementById('printBtn');
+
+const WALL_KEY='freedomWallNotes';
+const ARCHIVE_KEY='freedomWallArchive';
+
+function createNote(text,parent,isArchived=false){
+  const note=document.createElement('div');
+  note.className='note';
+  note.innerHTML=`
+    <div class="pin"></div>
+    <p>${text}</p>
+    <div class="actions">
+      ${isArchived?'<button class="undo">↩ Undo</button>':'<button class="archiveBtn">🗂</button>'}
+      <button class="deleteBtn">❌</button>
+    <button class="printBtn">🖨️</button>
+
+    </div>`;
+  parent.appendChild(note);
+
+ note.querySelector('.printBtn').addEventListener('click', () => {
+    // Clone the note
+   const noteClone = note.cloneNode(true); // This keeps the class and style
+
+
+    // Remove all buttons except the content
+    noteClone.querySelectorAll('button').forEach(btn => btn.style.display = 'none');
+
+    // Create a print container
+    const printContainer = document.createElement('div');
+    printContainer.className = 'print-only';
+    printContainer.appendChild(noteClone);
+
+    // Add to body temporarily
+    document.body.appendChild(printContainer);
+
+    // Trigger print
+    window.print();
+
+    // Remove after print
+    document.body.removeChild(printContainer);
+});
+
+  
+  note.querySelector('.deleteBtn').addEventListener('click',()=>{
+    note.remove(); saveAll();
+  });
+
+  if(!isArchived){
+    note.querySelector('.archiveBtn').addEventListener('click',()=>{
+      note.remove();
+      createNote(text,archive,true);
+      saveAll();
+    });
+  }else{
+    note.querySelector('.undo').addEventListener('click',()=>{
+      note.remove();
+      createNote(text,wall,false);
+      saveAll();
+    });
+  }
+}
+
+
+function saveAll(){
+  saveNotes(WALL_KEY,wall);
+  saveNotes(ARCHIVE_KEY,archive);
+}
+function saveNotes(key,container){
+  const arr=[];
+  container.querySelectorAll('.note p').forEach(p=>arr.push(p.textContent));
+  localStorage.setItem(key,JSON.stringify(arr));
+}
+function loadNotes(key,container,isArchived){
+  const arr=JSON.parse(localStorage.getItem(key)||'[]');
+  arr.forEach(t=>createNote(t,container,isArchived));
+}
+
+window.addEventListener('load',()=>{
+  loadNotes(WALL_KEY,wall,false);
+  loadNotes(ARCHIVE_KEY,archive,true);
+});
+
+addBtn.addEventListener('click',()=>{
+  const text=input.value.trim();
+  if(text){
+    createNote(text,wall,false);
+    input.value='';
+    saveAll();
+  }
+});
+
+toggleArchive.addEventListener('click',()=>{
+  archivePanel.style.display=archivePanel.style.display==='none'?'block':'none';
+});
+
+printBtn.addEventListener('click',()=>window.print());
+</script>
+</body>
+</html>

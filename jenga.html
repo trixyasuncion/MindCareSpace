@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mindful Jenga - Nature</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+      background: #87ceeb; /* fallback sky blue */
+    }
+    h1 {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      color: #fff;
+      font-size: 28px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+      z-index: 10;
+    }
+    #turn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌿 Mindful Jenga</h1>
+  <div id="turn">🎲 Turn: Player 1</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // ✅ Scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87ceeb); // Sky blue
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(10, 20, 10);
+    scene.add(dirLight);
+
+    // 🌱 Simple Green Ground (para sure na kita agad)
+    const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 });
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // 🧱 Jenga Blocks
+    const blockGeometry = new THREE.BoxGeometry(3, 1, 1);
+    const blockMaterial = new THREE.MeshPhongMaterial({ color: 0xdeb887 });
+    let blocks = [];
+    let y = 0;
+
+    for (let i = 0; i < 18; i++) {
+      for (let j = 0; j < 3; j++) {
+        const block = new THREE.Mesh(blockGeometry, blockMaterial.clone());
+        if (i % 2 === 0) {
+          block.position.set(j * 3 - 3, y + 0.5, 0);
+        } else {
+          block.position.set(0, y + 0.5, j * 3 - 3);
+        }
+        scene.add(block);
+        blocks.push(block);
+      }
+      y += 1;
+    }
+
+    // Camera Position (tutok sa gitna ng Jenga tower)
+    camera.position.set(15, 15, 25);
+    controls.target.set(0, 9, 0); // tutok sa gitna ng tower
+    controls.update();
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // 🎲 Player Turns
+    let currentPlayer = 1;
+    const turnDiv = document.getElementById("turn");
+
+    function nextTurn() {
+      currentPlayer = (currentPlayer % 4) + 1;
+      turnDiv.innerText = "🎲 Turn: Player " + currentPlayer;
+    }
+    setInterval(nextTurn, 5000);
+  </script>
+</body>
+</html>

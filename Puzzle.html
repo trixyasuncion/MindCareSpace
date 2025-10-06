@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Swipe Word Search — MindCare</title>
+<style>
+  :root{ --accent:#c1bac8; --bg:#f6f2ff; }
+  body{
+    margin:0; font-family:Arial,Helvetica,sans-serif;
+    background: linear-gradient(30deg,#e9f6fa,#ede6f3);
+    color:#222; text-align:center;
+  }
+  header{ padding:50px 12px 6px; }
+  header h1{ margin:0; color:var(--accent); }
+  header p{ margin:8px 0 0; color:#333; }
+
+  .wrap{ max-width:1180px; margin:18px auto 80px; padding:8px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+
+  .card{
+    width:360px; background:linear-gradient(30deg,#d1e5eb,#e2d2ef); border-radius:14px; padding:13px 10px;
+    box-shadow:0 8px 18px rgba(0,0,0,0.08);
+  }
+  .card h2{ margin:6px 0; color:var(--accent); font-size:18px; }
+  .note{ color:#444; margin:6px 0 10px; font-size:14px; }
+
+  /* grid */
+  .word-grid{
+    display:grid;
+    grid-template-columns:repeat(8,40px);
+    gap:6px;
+    justify-content:center;
+    margin:8px auto 10px;
+    user-select:none;
+    touch-action:none; /* critical for touch dragging */
+  }
+  .cell{
+    width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid #ccc; font-weight:700; font-size:16px;
+    color:#111; border-radius:6px;
+  }
+  .cell.highlight{ background:var(--accent); color:#fff; border-color:#acabad; }
+  .cell.found{ background:#9d8ae3; color:#fff; border-color:#7996df; } /* final matched */
+  .controls{ display:flex; gap:8px; justify-content:center; align-items:center; margin-top:8px; }
+  .counter{ font-weight:700; color:#333; }
+  .btn{ background:var(--accent); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+  .btn.secondary{ background:#6c6c6c; }
+  .hint{ font-size:12px; color:#666; margin-top:8px; }
+  @media (max-width:860px){ .wrap{ gap:12px } .card{ width:92%; max-width:420px } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💜 MindCare — Swipe Word Search</h1>
+  <p>Press and drag (or swipe) across letters to highlight them. When you highlight a complete word the counter updates.</p>
+</header>
+
+<main class="wrap">
+
+  <!-- Puzzle 1 -->
+  <section class="card" aria-labelledby="p1title">
+    <h2 id="p1title">Positive Word Search #1</h2>
+    <p class="note"><strong>Find:</strong> PEACE, HOPE, JOY, KIND</p>
+    <div id="grid1" class="word-grid" role="application" aria-label="word search grid 1"></div>
+    <div class="controls">
+      <div id="counter1" class="counter">Words found: 0 / 4</div>
+      <button class="btn" onclick="clearPuzzle(1)">Clear</button>
+    </div>
+    <div class="hint"></div>
+  </section>
+
+  <!-- Puzzle 2 -->
+  <section class="card" aria-labelledby="p2title">
+    <h2 id="p2title">Positive Word Search #2</h2>
+    <p class="note"><strong>Find:</strong> LOVE, SMILE, CARE, HOPE</p>
+    <div id="grid2" class="word-grid" role="application" aria-label="word search grid 2"></div>
+    <div class="controls">
+      <div id="counter2" class="counter">Words found: 0 / 4</div>
+      <button class="btn" onclick="clearPuzzle(2)">Clear</button>
+    </div>
+    <div class="hint"></div>
+  </section>
+
+  <!-- Puzzle 3 -->
+  <section class="card" aria-labelledby="p3title">
+    <h2 id="p3title">Positive Word Search #3</h2>
+    <p class="note"><strong>Find:</strong> BRAVE, FAITH, CALM, GROW</p>
+    <div id="grid3" class="word-grid" role="application" aria-label="word search grid 3"></div>
+    <div class="controls">
+      <div id="counter3" class="counter">Words found: 0 / 4</div>
+      <button class="btn" onclick="clearPuzzle(3)">Clear</button>
+    </div>
+    <div class="hint"></div>
+  </section>
+
+</main>
+
+<!-- small nav back -->
+<a href="MindCareSpace.html" style="display:block;text-align:center;color:var(--accent);margin-bottom:32px;">← Back to Home</a>
+
+<script>
+/* =========================
+   Puzzle data: words + grids
+   ========================= */
+
+const puzzles = {
+  1: {
+    words: ["PEACE","HOPE","JOY","KIND"],
+    grid: [
+    ['A','O','J','R','P','H','Y','C'],
+    ['N','E','I','E','W','O','D','K'],
+    ['X','H','A','C','K','P','R','I'],
+    ['E','C','D','P','A','E','Y','N'],
+    ['E','F','E','G','B','O','Q','D'],
+    ['S','R','P','W','J','T','H','M'],
+    ['V','Q','N','H','E','D','U','L'],
+    ['Y','M','O','S','X','T','F','R'],
+  ]
+  },
+  2: {
+    words: ["LOVE","SMILE","CARE","HOPE"],
+    grid: [
+    ['S','Z','L','A','R','E','P','V'],
+    ['C','M','I','H','O','P','E','E'],
+    ['L','E','I','O','X','G','O','S'],
+    ['N','D','R','L','U','E','W','Q'],
+    ['B','C','A','R','E','A','J','G'],
+    ['K','M','L','E','I','V','N','Y'],
+    ['Q','O','W','V','Z','U','O','X'],
+    ['R','G','A','C','E','Y','F','L'],
+  ]
+
+  },
+  3: {
+    words: ["BRAVE","FAITH","CALM","GROW"],
+    grid: [
+    ['Q','J','R','B','V','A','E','W'],
+    ['F','I','T','A','H','O','M','C'],
+    ['A','L','C','D','S','G','T','X'],
+    ['E','B','W','K','O','V','R','J'],
+    ['U','N','H','G','A','F','Y','P'],
+    ['O','R','P','M','Q','N','I','L'],
+    ['D','C','W','Y','Z','X','U','S'],
+    ['G','A','J','H','B','E','C','K'],
+  ]
+
+  }
+};
+
+/* keep track of found words per puzzle */
+const found = {1: new Set(), 2: new Set(), 3: new Set() };
+
+/* create all puzzles */
+for(const id of [1,2,3]) createPuzzle(id);
+
+/* ----- createPuzzle builds grid + pointer handling ----- */
+function createPuzzle(id){
+  const data = puzzles[id];
+  const gridEl = document.getElementById('grid'+id);
+  gridEl.innerHTML = '';
+
+  // Build cells
+  for(let r=0;r<data.grid.length;r++){
+    for(let c=0;c<data.grid[0].length;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = data.grid[r][c];
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      gridEl.appendChild(cell);
+    }
+  }
+
+  let activePointer = null;
+  let dragging = false;
+
+  // pointerdown: start drag and highlight initial cell
+  gridEl.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    activePointer = e.pointerId;
+    dragging = true;
+    try{ gridEl.setPointerCapture(activePointer); } catch(_) {}
+    // highlight the starting cell
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if(el && el.parentElement === gridEl && el.classList.contains('cell')){
+      el.classList.add('highlight');
+      checkWords(id);
+    }
+  });
+
+  // pointermove: highlight cells while dragging
+  gridEl.addEventListener('pointermove', (e) => {
+    if(!dragging || activePointer !== e.pointerId) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if(!el) return;
+    if(el.parentElement === gridEl && el.classList.contains('cell') && !el.classList.contains('highlight')){
+      el.classList.add('highlight');
+      checkWords(id);
+    }
+  });
+
+  // pointerup / cancel: stop drag and release capture
+  function endDrag(e){
+    if(activePointer === null) return;
+    if(e && e.pointerId !== undefined && e.pointerId !== activePointer) return;
+    try{ gridEl.releasePointerCapture(activePointer); } catch(_) {}
+    activePointer = null;
+    dragging = false;
+  }
+  gridEl.addEventListener('pointerup', endDrag);
+  gridEl.addEventListener('pointercancel', endDrag);
+  // also listen on document for safety (pointer could end outside grid)
+  document.addEventListener('pointerup', endDrag);
+}
+
+/* ----- checkWords: check highlighted cells vs word positions ----- */
+function checkWords(id){
+  const data = puzzles[id];
+  const gridEl = document.getElementById('grid'+id);
+  // set of highlighted coordinates "r,c"
+  const highlighted = new Set([...gridEl.querySelectorAll('.cell.highlight')].map(el=> el.dataset.row + ',' + el.dataset.col));
+
+  // for each not-yet-found word try to find a straight-line occurrence where all positions are highlighted
+  for(const word of data.words){
+    if(found[id].has(word)) continue;
+    const L = word.length;
+    const dirs = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+    outer: for(let r=0;r<data.grid.length;r++){
+      for(let c=0;c<data.grid[0].length;c++){
+        for(const [dr,dc] of dirs){
+          let ok = true;
+          for(let k=0;k<L;k++){
+            const rr = r + dr*k;
+            const cc = c + dc*k;
+            if(rr < 0 || cc < 0 || rr >= data.grid.length || cc >= data.grid[0].length){ ok = false; break; }
+            if(data.grid[rr][cc] !== word[k]){ ok = false; break; }
+            if(!highlighted.has(rr+','+cc)){ ok = false; break; }
+          }
+          if(ok){
+            // mark found
+            found[id].add(word);
+            // mark the matched cells permanently as 'found'
+            for(let k=0;k<L;k++){
+              const rr = r + dr*k;
+              const cc = c + dc*k;
+              const cell = gridEl.querySelector(`.cell[data-row="${rr}"][data-col="${cc}"]`);
+              if(cell){ cell.classList.add('found'); cell.classList.remove('highlight'); }
+            }
+            break outer;
+          }
+        }
+      }
+    }
+  }
+
+  // update counter
+  const counterEl = document.getElementById('counter'+id);
+  counterEl.textContent = `Words found: ${found[id].size} / ${data.words.length}`;
+}
+
+/* ----- clear puzzle - remove highlights and found status ----- */
+function clearPuzzle(id){
+  const gridEl = document.getElementById('grid'+id);
+  [...gridEl.querySelectorAll('.cell.highlight'), ...gridEl.querySelectorAll('.cell.found')].forEach(el=>{
+    el.classList.remove('highlight','found');
+  });
+  found[id].clear();
+  document.getElementById('counter'+id).textContent = `Words found: 0 / ${puzzles[id].words.length}`;
+}
+
+/* Prevent accidental text selection while long-pressing on some browsers */
+document.addEventListener('selectstart', (e) => {
+  if(e.target.closest('.word-grid')) e.preventDefault();
+});
+</script>
+</body>
+</html>
